@@ -1,0 +1,13 @@
+[Unit]
+Description=Pi-DAQ Daemon
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=pi
+ExecStart=/var/pidaq/start.sh
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target 

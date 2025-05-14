@@ -1,7 +1,7 @@
-import adam6217
+import adam6200
 
 if __name__ == '__main__':
-	adam1 = adam6217.ADAM6217('192.168.2.153')
+	adam1 = adam6200.ADAM6200('192.168.2.153')
 
 	try:
 		values = adam1.get_values()
@@ -17,8 +17,4 @@ if __name__ == '__main__':
 
 	print(values)
 
-	voltages = adam1.convert_to_voltages(values)
-	print(voltages)
-
-	currents = adam1.convert_to_currents(values)
-	print(currents)
+	print(adam1.ranges)
