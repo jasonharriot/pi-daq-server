@@ -1,7 +1,7 @@
 import adam6200
 
 if __name__ == '__main__':
-	adam1 = adam6200.ADAM6200('192.168.2.153')
+	adam1 = adam6200.ADAM6200('192.168.1.10')
 
 	try:
 		values = adam1.get_values()

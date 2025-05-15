@@ -6,7 +6,7 @@ cd $(dirname $0)
 
 source venv/bin/activate
 
-python3 pidaq_server.py
+python3 -u pidaq_server.py	# -u for unbuffered, so output appears in the journal without delay.
 
 e=$?
 

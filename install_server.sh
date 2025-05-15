@@ -138,6 +138,20 @@ fi
 
 
 
+# Configure network
+#
+sudo ifconfig eth0 192.168.1.2	#Forces eth0 to have an ipv4 adress, not ipv6. The ADAM and pi will not be able to negotiate ip addresses (even if they are both static) if one is using ipv4 and the other ipv6. More research needed on this fix. The address used here to force the change is chosen arbitrarily.
+
+if [ $e -eq "0" ]; then
+	echo "Set an ipv4 address on the interface."
+else
+	echo "Failed to set an ipv4 address. ($e)"
+	generalerror=1
+fi
+
+
+
+
 
 
 
