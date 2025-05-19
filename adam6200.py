@@ -141,7 +141,7 @@ class ADAM6200:    #Provides a generic class for accessing an ADAM-6200 series m
 
             r = self.ranges[id]
 
-            value = (raw_value - min_symbol) * (r['max'] - r['min']) // (max_symbol - min_symbol) + r['min']
+            value = (raw_value - min_symbol) * (r['max'] - r['min']) / (max_symbol - min_symbol) + r['min']
 
             values[id] = value
 
