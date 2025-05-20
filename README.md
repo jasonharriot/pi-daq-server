@@ -3,9 +3,9 @@ EDAC Labs, Inc. 2025
 
 # pi-daq-server
 This software facilitates the following:
-- Logging of data from Advantech ADAM-6200 series or similar devices
-- Serving of data over the network via an API
-- Analysis of data
+- Logging of data from Advantech ADAM-6200 series or similar device
+- Serving of data over the network via MySQL
+- Analysis of data in Python with Matplotlib, Numpy, etc.
 ---
 # Steps to install the server portion of this software on a raspberry pi:
 - Get a terminal
@@ -13,7 +13,7 @@ This software facilitates the following:
 	- USB keyboard and HDMI display are also okay.
 - Install git.
     - Try `git` to test for an existing installation.
-- Clone this repository
+- Clone this repository.
 	-`git clone https://github.com/jasonharriot/pi-daq-server`
 - Run the install script:
 	- `chmod +x install_server.sh`
@@ -22,7 +22,7 @@ This software facilitates the following:
 	```[mysql]
 	host=localhost
 	user=pi-daq-server
-	password=<Pi DAQ server password>
+	password=<Pi DAQ server password for SQL access>
 	database=hydromet_reactor
 
 	[adam1]
@@ -34,7 +34,7 @@ This software facilitates the following:
 	```[mysql]
 		host=pidaq.local
 		user=pi-daq-client
-		password=<Pi DAQ client password>
+		password=<Pi DAQ client password for SQL access>
 		database=hydromet_reactor
 - Figure out which Python command to use.
 	- On Windows:
