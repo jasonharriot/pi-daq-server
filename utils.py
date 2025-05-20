@@ -13,7 +13,8 @@ class Timer:
             if self.last_datetime is None:
                 self.last_datetime = now
 
-            self.last_datetime += self.interval
+            while now - self.last_datetime > self.interval: #Bring the last time up to current in ammounts equal to the interval.
+                self.last_datetime += self.interval
 
             return True
 

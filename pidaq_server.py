@@ -15,7 +15,6 @@ def map_raw_value(value, calib_item):
 
 
 def capture_values(adam, db, calib):
-        
     cur = db.cursor()
 
     #Create a data table
@@ -75,12 +74,16 @@ def capture_ranges(adam, db, calib):
     #Create a range table
 
     table_str = 'id INT AUTO_INCREMENT PRIMARY KEY, timestamp TIMESTAMP DEFAULT UTC_TIMESTAMP, channel INT, range_id CHAR(16), name CHAR(16), range_min FLOAT, range_max FLOAT, unit CHAR(16)'
-    cur.execute(f'CREATE TABLE IF NOT EXISTS adam_range ({table_str})')
+    cmd_str = f'CREATE TABLE IF NOT EXISTS adam_range ({table_str})'
+    print(cmd_str)
+    cur.execute(cmd_str)
 
     ranges = adam.ranges
 
     for channel, r in ranges.items():
-        cur.execute(f'INSERT INTO adam_range (channel, range_id, name, range_min, range_max, unit) VALUES ("{channel}", "{r["id"]}", "{r["name"]}", "{r["min"]}", "{r["max"]}", "{r["unit"]}")')
+        cmd_str = f'INSERT INTO adam_range (channel, range_id, name, range_min, range_max, unit) VALUES ("{channel}", "{r["id"]}", "{r["name"]}", "{r["min"]}", "{r["max"]}", "{r["unit"]}")'
+        print(cmd_str)
+        cur.execute(cmd_str)
 
     db.commit()
     cur.close()
@@ -141,5 +144,5 @@ if __name__ == '__main__':
         if range_timer.fire():
             capture_ranges(adam1, db, calib)
 
-            time.sleep(.1)
+        time.sleep(.1)
 
