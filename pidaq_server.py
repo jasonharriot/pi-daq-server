@@ -130,12 +130,19 @@ if __name__ == '__main__':
             'max_raw':5,
             'min_real':337,
             'max_real':785,
+        },
+        5:{
+            'name':'S1',
+            'min_raw':0,
+            'max_raw':20,
+            'min_real':0,
+            'max_real':87
         }
     }
 
 
-    data_timer = utils.Timer(datetime.timedelta(seconds=1))
-    range_timer = utils.Timer(datetime.timedelta(days=1))
+    data_timer = utils.Timer(datetime.timedelta(seconds=10))    #Capture new data at this interval
+    range_timer = utils.Timer(datetime.timedelta(days=1))   #Record the current range info for future reference at this interval
 
     while True:
         if data_timer.fire():
