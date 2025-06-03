@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 expected_server_data_rate = .1  #The expected frequency of datapoints collected by the server, in samples per second. Used to calculate decimation.
+reactor_volume_empty_threshold = 338    #If equal to or below this volume, the volume datapoint will be changed to zero.
 
 class Timer:    #Basic timer class. Maintains a set interval.
     def __init__(self, interval):
@@ -104,6 +105,16 @@ def fetch_df(db, start_date, end_date, decimation): #Fetch a dataframe from the 
     print(f'SQL command exeuted.')
 
     df['timestamp_local'] = df['timestamp'].apply(convert_utc_local)    #Create a new column for a localized timestamp. The timestamp from the server is in UTC.
+
+    #Modify the volume column to be zero if below a threshold
+    def f(x):
+        if x > reactor_volume_empty_threshold:
+            return x
+
+        return float('NaN')
+
+    df['V1_real'] = df['V1_real'].apply(f)
+
 
     print(f'Received total of {df.shape[0]} rows')
 
