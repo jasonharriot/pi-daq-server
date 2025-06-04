@@ -6,7 +6,19 @@ import pandas as pd
 import numpy as np
 
 expected_server_data_rate = .1  #The expected frequency of datapoints collected by the server, in samples per second. Used to calculate decimation.
-reactor_volume_empty_threshold = 338    #If equal to or below this volume, the volume datapoint will be changed to zero.
+reactor_volume_empty_threshold = 338    #If equal to or below this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
+reactor_volume_full_threshold = 753     #If equal to or above this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
+
+def agitation_liquid_level_compensator(volume, speed):  #Return the real liquid level for any given reported liquid level and agitation speed
+
+    #Volume not considered yet.
+    delta_V = 327e-6*pow(speed, 3) + 11.15e-3*pow(speed, 2) + 11.02e-3*speed    #Change in volume due to agitation
+
+    volume_compensated = volume - delta_V
+
+    #print(f'[Compensator] V1: {volume} S1: {speed} V1c: {volume_compensated}')
+
+    return volume_compensated
 
 class Timer:    #Basic timer class. Maintains a set interval.
     def __init__(self, interval):
@@ -106,14 +118,22 @@ def fetch_df(db, start_date, end_date, decimation): #Fetch a dataframe from the 
 
     df['timestamp_local'] = df['timestamp'].apply(convert_utc_local)    #Create a new column for a localized timestamp. The timestamp from the server is in UTC.
 
-    #Modify the volume column to be zero if below a threshold
+
+    #Modify the volume column to be zero if below or above a threshold.
     def f(x):
-        if x > reactor_volume_empty_threshold:
+        if x > reactor_volume_empty_threshold and x < reactor_volume_full_threshold:
             return x
 
         return float('NaN')
 
     df['V1_real'] = df['V1_real'].apply(f)
+
+
+
+    #Calculate the real liquid level, compensated for agitation. Make this calculation AFTER nullifying over-full and under-empty volume measurements in V1_real. This way, the compensated volume will also be NaN at appropriate times.
+    df['V1_compensated'] = df.apply(lambda x: agitation_liquid_level_compensator(x.V1_real, x.S1_real), axis=1)
+
+    
 
 
     print(f'Received total of {df.shape[0]} rows')
