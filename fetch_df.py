@@ -4,42 +4,17 @@ import time
 import zoneinfo
 import pandas as pd
 import numpy as np
+import liquid_level
 
 expected_server_data_rate = .1  #The expected frequency of datapoints collected by the server, in samples per second. Used to calculate decimation.
 reactor_volume_empty_threshold = 338    #If equal to or below this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
 reactor_volume_full_threshold = 753     #If equal to or above this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
 
-def agitation_liquid_level_compensator(volume, speed):  #Return the real liquid volume for any given reported liquid level and agitation speed
+def convert_utc_local(date):
+    timestamp_utc = date.replace(tzinfo=datetime.timezone.utc) #Interpret the date as UTC. Don't change it, just assume that it represents UTC.
+    timestamp_local = timestamp_utc.astimezone(zoneinfo.ZoneInfo('America/New_York'))   #Convert the date (yes, actually changing the time) to a local timezone.
 
-    #Volume not considered.
-    #delta_V = 327e-6*pow(speed, 3) + 11.15e-3*pow(speed, 2) + 11.02e-3*speed    #Change in volume due to agitation
-
-    delta_V = (3.19e-2)*pow(speed, 2) - (1.69e-1)*speed
-
-    volume_compensated = volume - delta_V
-
-    #print(f'[Compensator] V1: {volume} S1: {speed} V1c: {volume_compensated}')
-
-    return volume_compensated
-
-class Timer:    #Basic timer class. Maintains a set interval.
-    def __init__(self, interval):
-        self.last_datetime = None
-        self.interval = interval
-
-    def fire(self):
-        now = datetime.datetime.now()
-
-        if self.last_datetime is None or now - self.last_datetime > self.interval:
-            if self.last_datetime is None:
-                self.last_datetime = now
-
-            while now - self.last_datetime > self.interval: #Bring the last time up to current in ammounts equal to the interval.
-                self.last_datetime += self.interval
-
-            return True
-
-        return False
+    return timestamp_local
 
 def fetch_columns(db):
     cur = db.cursor()
@@ -52,12 +27,6 @@ def fetch_columns(db):
         column_names.append(row[0])
 
     return column_names
-
-def convert_utc_local(date):
-    timestamp_utc = date.replace(tzinfo=datetime.timezone.utc) #Interpret the date as UTC. Don't change it, just assume that it represents UTC.
-    timestamp_local = timestamp_utc.astimezone(zoneinfo.ZoneInfo('America/New_York'))   #Convert the date (yes, actually changing the time) to a local timezone.
-
-    return timestamp_local
 
 def fetch_df_date(db, start_date, target_point_count):  #Fetch dataframe by start date and number of points
     now = datetime.datetime.now(datetime.timezone.utc)    #Get UTC time
@@ -133,7 +102,7 @@ def fetch_df(db, start_date, end_date, decimation): #Fetch a dataframe from the 
 
 
     #Calculate the real liquid level, compensated for agitation. Make this calculation AFTER nullifying over-full and under-empty volume measurements in V1_real. This way, the compensated volume will also be NaN at appropriate times.
-    df['V1_compensated'] = df.apply(lambda x: agitation_liquid_level_compensator(x.V1_real, x.S1_real), axis=1)
+    df['V1_compensated'] = df.apply(lambda x: liquid_level.agitation_liquid_level_compensator(x.V1_real, x.S1_real), axis=1)
 
     
 
