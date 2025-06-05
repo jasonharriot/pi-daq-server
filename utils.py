@@ -9,10 +9,12 @@ expected_server_data_rate = .1  #The expected frequency of datapoints collected 
 reactor_volume_empty_threshold = 338    #If equal to or below this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
 reactor_volume_full_threshold = 753     #If equal to or above this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
 
-def agitation_liquid_level_compensator(volume, speed):  #Return the real liquid level for any given reported liquid level and agitation speed
+def agitation_liquid_level_compensator(volume, speed):  #Return the real liquid volume for any given reported liquid level and agitation speed
 
-    #Volume not considered yet.
-    delta_V = 327e-6*pow(speed, 3) + 11.15e-3*pow(speed, 2) + 11.02e-3*speed    #Change in volume due to agitation
+    #Volume not considered.
+    #delta_V = 327e-6*pow(speed, 3) + 11.15e-3*pow(speed, 2) + 11.02e-3*speed    #Change in volume due to agitation
+
+    delta_V = (3.19e-2)*pow(speed, 2) - (1.69e-1)*speed
 
     volume_compensated = volume - delta_V
 
