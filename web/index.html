@@ -1,0 +1,121 @@
+<html>
+	<head>
+		<style>
+			#container{
+				width: 800px;
+				margin-left: auto;
+				margin-right: auto;
+				padding: 50px;
+				padding-bottom : 250px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">
+			<title>
+				Reactor Process Values
+			</title>
+
+			<h1>
+				Reactor process values
+			</h1>
+			<p>
+				This page serves periodically generated data and plots from the <i>backup</i> database. The reactor Pi DAQ server hosts a <i>primary</i>, internal database. This backup database, and thus the data and plots here, may be out-of-date or discontinuous from the primary data.
+			</p>
+
+			<h2>
+				I&mdash;Notes
+			</h2>
+			<p>
+				The water level of the reactor probe tip is 582 L. More liquid than this amount is required for acurate temperature measurement.
+			</p>
+
+			<!--You may need to force-refresh your browser to avoid seeing a cached image (shift+r, shift+F5, etc.).-->
+
+			<h2>
+				II&mdash;Latest single-sample data
+			</h2>
+			<div id="datasection">
+				<i><span id="datatime"></span></i>
+				<br>
+				Temperature (probe): <span id="datat1"></span> &deg;C
+				<br>
+				Temperature (infrared): <span id="datat2"></span> &deg;C
+				<br>
+				Volume: <span id="datavolume"></span> L 
+				<br>
+				Compensated volume: <span id="datavolumec"></span> L
+				<br>
+				Agitation speed: <span id="dataspeed"></span> RPM
+				<br>
+				Reactor power: <span id="datapower"></span> kW
+				<br>
+			</div>
+
+			<h2>
+				III&mdash;Long-term plots
+			</h2>
+			<h3>
+				Plot A
+			</h3>
+			<img class="liveimg" basesrc="img/live_a.png">
+			<h3>
+				Plot B
+			</h3>
+			<img class="liveimg" basesrc="img/live_b.png">
+			<h2>
+				IV&mdash;Short-term plots
+			</h2>
+			<h3>
+				Plot C
+			</h3>
+			<img class="liveimg" basesrc="img/live_c.png">
+			<h3>
+				Plot D
+			</h3>
+			<img class="liveimg" basesrc="img/live_d.png">
+			<h3>
+				Plot E
+			</h3>
+			<img class="liveimg" basesrc="img/live_e.png">
+
+
+		</div>
+
+		<script type="text/javascript">
+			function update(){
+				elems = document.getElementsByClassName("liveimg");
+
+				cachebuster = new Date().getTime();
+
+				for(let i=0; i<elems.length; i++){
+					elem = elems[i];
+					//console.log("Updating this image element: ");
+					//console.log(elem);
+					elem.src = elem.attributes['basesrc'].value + "?" + cachebuster;
+				}
+
+				var xmlHttp = new XMLHttpRequest();
+				xmlHttp.onreadystatechange = function(){ 
+					if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+						jsonObj = JSON.parse(xmlHttp.responseText);
+						//console.log(jsonObj);
+						document.getElementById('datatime').innerText = new Date(jsonObj['timestamp']);
+						document.getElementById('datat1').innerText = Math.floor(jsonObj['T1']*10)/10;
+						document.getElementById('datat2').innerText = Math.floor(jsonObj['T2']*10)/10;
+						document.getElementById('datapower').innerText = Math.floor(jsonObj['P1']*100/1000)/100;
+						document.getElementById('dataspeed').innerText = Math.floor(jsonObj['S1']*10)/10;
+						document.getElementById('datavolume').innerText = Math.floor(jsonObj['V1']);
+						document.getElementById('datavolumec').innerText = Math.floor(jsonObj['V1c']);
+					}
+				}
+				xmlHttp.open("GET", 'json/live.json?' + cachebuster, true);
+				xmlHttp.send(null);
+			}
+
+			setInterval(update, 10000);
+
+			update();
+		</script>
+	</body>
+</html>
