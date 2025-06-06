@@ -7,26 +7,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
-import utils
+import fetch_df
+import pi_daq_db
 
 if __name__ == '__main__':
-    cfg = configparser.ConfigParser()
-    cfg.read('config_client.ini')   #Read sensitive parameters from the configuration file.
-
-    mysql_config = cfg['mysql']
-
-    db = mysql.connector.connect(
-        host=mysql_config['host'],
-        user=mysql_config['user'],
-        password=mysql_config['password'],
-        database=mysql_config['database']
-        )
+    db = pi_daq_db.PiDAQDB()
 
     #Construct a basic line plot
 
-    start_date = datetime.datetime.strptime('2025-05-23 15:40:00', '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc) #UTC start date/time.
+    start_date = datetime.datetime.strptime('2025-01-01 00:00:00', '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc) #UTC start date/time.
 
-    df = utils.fetch_df_date(db, start_date, 1000)    #Grab the latest data. Decimate to 1000 points.
+    df = fetch_df.fetch_df_date(db, start_date, 50000)    #Grab the latest data. Decimate to 1000 points.
 
     fig, ax1 = plt.subplots(layout='constrained')    #Get the figure object and primary axes for later use
 
@@ -37,7 +28,7 @@ if __name__ == '__main__':
 
     ax1.plot([0, 100], [0, 100], color='grey')  #A 1:1 reference line
 
-    ax1.plot(df['T1_real'], df['T2_real'], color='black')
+    ax1.scatter(df['T1_real'], df['T2_real'], color='black', marker='+')
 
     min_T1 = df['T1_real'].min()
     max_T1 = df['T1_real'].max()

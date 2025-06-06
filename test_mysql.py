@@ -1,53 +1,25 @@
 import mysql.connector
 import adam6200
+import pi_daq_db
+import fetch_df
 
-db = mysql.connector.connect(
-        #host="pidaq.local",
-        host="localhost",
-        user="pi-daq-client",
-        password="R7prr@bXw",
-        database="hydromet_reactor"
-        )
 
-print(db)
+db = pi_daq_db.PiDAQDB()
 
-cur = db.cursor()
+res = db.execute('show databases')
 
-cur.execute('show databases')
-
-for row in cur:
+print('Databases available:')
+for row in res:
     print(row)
 
+#db.commit()
 
+df_columns = fetch_df.fetch_columns(db)
+print('Columns available:')
+print(df_columns)
 
-#Create a test data table
-
-table_str = 'id INT AUTO_INCREMENT PRIMARY KEY, timestamp TIMESTAMP DEFAULT UTC_TIMESTAMP, channel INT, value INT'
-print(f'Making a table with this configuration: {table_str}')
-cur.execute(f"CREATE TABLE IF NOT EXISTS adam_value ({table_str})")
-
-
-
-#Create a test range table
-
-table_str = 'id INT AUTO_INCREMENT PRIMARY KEY, timestamp TIMESTAMP DEFAULT UTC_TIMESTAMP, channel INT, range_id CHAR(16), name CHAR(16), range_min INT, range_max INT, unit CHAR(16)'
-print(f'Making a table with this configuration: {table_str}')
-cur.execute(f'CREATE TABLE IF NOT EXISTS adam_range ({table_str})')
-
-adam1 = adam6200.ADAM6200('192.168.1.10')
-
-ranges = adam1.ranges
-
-for channel, r in ranges.items():
-    print(r["name"])
-    cur.execute(f'INSERT INTO adam_range (channel, range_id, name, range_min, range_max, unit) VALUES ("{channel}", "{r["id"]}", "{r["name"]}", "{r["min"]}", "{r["max"]}", "{r["unit"]}")')
-
-values = adam1.get_values()
-
-for channel, v in values.items():
-    cur.execute(f'INSERT INTO adam_value (channel, value) VALUES ("{channel}", "{v}")')
-
-
-db.commit()
+df = fetch_df.fetch_df_hours(db, 1, 100)
+print('Data table:')
+print(df)
 
 print('Done.')

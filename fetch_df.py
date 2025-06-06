@@ -5,6 +5,7 @@ import zoneinfo
 import pandas as pd
 import numpy as np
 import liquid_level
+from sqlalchemy import text
 
 expected_server_data_rate = .1  #The expected frequency of datapoints collected by the server, in samples per second. Used to calculate decimation.
 reactor_volume_empty_threshold = 338    #If equal to or below this volume, the reactor does not have enough liquid in it to make a volume measurement. The volume datapoint will be changed to NaN.
@@ -17,13 +18,11 @@ def convert_utc_local(date):
     return timestamp_local
 
 def fetch_columns(db):
-    cur = db.cursor()
-
-    cur.execute(f"SHOW COLUMNS IN adam_rows")
+    res = db.execute('SHOW COLUMNS IN adam_rows')
 
     column_names = []
 
-    for row in cur:
+    for row in res:
         column_names.append(row[0])
 
     return column_names
@@ -74,8 +73,6 @@ def fetch_df_hours(db, timespan_hours, target_point_count): #Fetch dataframe by 
 def fetch_df(db, start_date, end_date, decimation): #Fetch a dataframe from the SQL server. Dates must be UTC. Specify start and end dates, and decimation factor.
     column_names = fetch_columns(db)
 
-    cur = db.cursor()
-
     start_date_str = start_date.strftime('%Y-%m-%d %H:%M:%S')   #Start date. Make a string representation of the date and time in a format like: 2025-05-23 13:48:34
     end_date_str = end_date.strftime('%Y-%m-%d %H:%M:%S')   #End date
 
@@ -83,9 +80,9 @@ def fetch_df(db, start_date, end_date, decimation): #Fetch a dataframe from the 
 
     query_str = f"SELECT * FROM adam_rows WHERE timestamp >= '{start_date_str}' AND timestamp <= '{end_date_str}' AND id % {decimation} = 0"
 
-    df = pd.read_sql(query_str, db)
+    df = pd.read_sql(text(query_str), db.connection)
 
-    print(f'SQL command exeuted.')
+    #print(f'SQL command exeuted.')
 
     df['timestamp_local'] = df['timestamp'].apply(convert_utc_local)    #Create a new column for a localized timestamp. The timestamp from the server is in UTC.
 
@@ -108,7 +105,5 @@ def fetch_df(db, start_date, end_date, decimation): #Fetch a dataframe from the 
 
 
     print(f'Received total of {df.shape[0]} rows')
-
-    cur.close()
 
     return df

@@ -7,25 +7,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
-import utils
+import fetch_df
+import pi_daq_db
 
 if __name__ == '__main__':
-    cfg = configparser.ConfigParser()
-    cfg.read('config_client.ini')   #Read sensitive parameters from the configuration file.
-
-    mysql_config = cfg['mysql']
-
-    db = mysql.connector.connect(
-        host=mysql_config['host'],
-        user=mysql_config['user'],
-        password=mysql_config['password'],
-        database=mysql_config['database']
-        )
+    db = pi_daq_db.PiDAQDB()
 
 
     #Construct a basic line plot
 
-    df = utils.fetch_df_hours(db, 48, 1000)    #Grab the latest data. Past 48 hours, decimate to 1000 points.
+    df = fetch_df.fetch_df_hours(db, 48, 1000)    #Grab the latest data. Past 48 hours, decimate to 1000 points.
 
     df['Tdiff'] = df['T2_real'] - df['T1_real']
     

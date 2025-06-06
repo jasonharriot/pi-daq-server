@@ -7,21 +7,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
-import utils
+import fetch_df
 from scipy.signal import savgol_filter
+import pi_daq_db
 
 if __name__ == '__main__':
-    cfg = configparser.ConfigParser()
-    cfg.read('config_client.ini')   #Read sensitive parameters from the configuration file.
-
-    mysql_config = cfg['mysql']
-
-    db = mysql.connector.connect(
-        host=mysql_config['host'],
-        user=mysql_config['user'],
-        password=mysql_config['password'],
-        database=mysql_config['database']
-        )
+    db = pi_daq_db.PiDAQDB()
 
     start_date_str = '2025-05-23 15:40:00' #UTC start date/time.
     end_date_str = '2025-05-28 20:47:00' #UTC end date/time.
@@ -29,11 +20,11 @@ if __name__ == '__main__':
     #start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
     #end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
 
-    #df = utils.fetch_df_date(db, start_date, 0) #Grab the latest data.  Set number of points to zero to fetch all.
-    #df = utils.fetch_df_date_date(db, start_date, end_date, 1000) #Grab the latest N datapoints. Actual number of rows returned is approximate.
+    #df = fetch_df.fetch_df_date(db, start_date, 0) #Grab the latest data.  Set number of points to zero to fetch all.
+    #df = fetch_df.fetch_df_date_date(db, start_date, end_date, 1000) #Grab the latest N datapoints. Actual number of rows returned is approximate.
 
     timespan_hours = 96 #Hours. This variable used to insert a nice label in the plot title.
-    df = utils.fetch_df_hours(db, timespan_hours, 1000) #Grab n datapoints across the past t hours.
+    df = fetch_df.fetch_df_hours(db, timespan_hours, 1000) #Grab n datapoints across the past t hours.
 
     #Calculate reactor energy
 
