@@ -7,8 +7,12 @@ class PiDAQDB:
         self.cfg.read('config_client.ini')   #Read sensitive parameters from the configuration file.
 
         mysql_config = self.cfg['mysql']
+        user=mysql_config['user']
+        password = mysql_config['password']
+        host = mysql_config['host']
+        database = mysql_config['database']
 
-        connection_str = f'mysql://{mysql_config['user']}:{mysql_config['password']}@{mysql_config['host']}/{mysql_config['database']}'
+        connection_str = f'mysql://{user}:{password}@{host}/{database}'
 
         #print(connection_str)
 

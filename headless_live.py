@@ -13,6 +13,7 @@ import fetch_df
 import timer
 from scipy.signal import savgol_filter
 from scipy.ndimage import gaussian_filter1d
+import pi_daq_db
 
 def write_latest_data(df, filepath):
     #Write the latest data to a JSON file.
@@ -198,17 +199,7 @@ def do_plot_3(df, timespan_hours, filepath):    #Plot liquid level(s), agitation
 
 
 if __name__ == '__main__':
-    cfg = configparser.ConfigParser()
-    cfg.read('config_client.ini')   #Read sensitive parameters from the configuration file.
-
-    mysql_config = cfg['mysql']
-
-    db = mysql.connector.connect(
-        host=mysql_config['host'],
-        user=mysql_config['user'],
-        password=mysql_config['password'],
-        database=mysql_config['database']
-        )
+    db = pi_daq_db.PiDAQDB()
 
     img_dir_path = 'web/img/'
     json_dir_path = 'web/json'
