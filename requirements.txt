@@ -1,2 +1,6 @@
 requests
 mysql-connector-python
+pandas
+matplotlib
+scipy
+mysqlclient

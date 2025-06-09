@@ -1,7 +1,6 @@
 import datetime
-import time
 
-class Timer:
+class Timer:    #Basic timer class. Maintains a set interval.
     def __init__(self, interval):
         self.last_datetime = None
         self.interval = interval
@@ -19,4 +18,3 @@ class Timer:
             return True
 
         return False
-        
