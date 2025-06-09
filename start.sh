@@ -16,7 +16,7 @@ fi
 
 source venv/bin/activate
 
-python3 -u pidaq_server.py	# -u for unbuffered, so output appears in the journal without delay.
+python3 -u pi_daq_server.py	# -u for unbuffered, so output appears in the journal without delay.
 
 e=$?
 

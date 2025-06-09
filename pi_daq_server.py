@@ -96,15 +96,21 @@ if __name__ == '__main__':
     cfg = configparser.ConfigParser()
     cfg.read('config_server.ini')   #Read sensitive parameters from the configuration file.
 
-    mysql_config = cfg['mysql']
     adam1_config = cfg['adam1']
 
-    db = mysql.connector.connect(
-        host=mysql_config['host'],
-        user=mysql_config['user'],
-        password=mysql_config['password'],
-        database=mysql_config['database']
-        )
+    databases = []
+
+    for config_mysql_section in ['mysql', 'mysqlalt1']:
+        config = cfg[config_mysql_section]
+        print(f'Creating connection to database at {config["host"]}')
+        db = mysql.connector.connect(
+            host=config['host'],
+            user=config['user'],
+            password=config['password'],
+            database=config['database']
+            )
+
+        databases.append(db)
 
     adam1 = adam6200.ADAM6200(adam1_config['ip'])
 
@@ -142,14 +148,24 @@ if __name__ == '__main__':
 
 
     data_timer = utils.Timer(datetime.timedelta(seconds=10))    #Capture new data at this interval
-    range_timer = utils.Timer(datetime.timedelta(days=1))   #Record the current range info for future reference at this interval
+
+    for database in databases:
+        capture_ranges(adam1, database, calib)
 
     while True:
         if data_timer.fire():
-            capture_values(adam1, db, calib)
-
-        if range_timer.fire():
-            capture_ranges(adam1, db, calib)
+            for database in databases:
+                try:
+                    capture_values(adam1, database, calib)
+                except:
+                    print(f'Exception while writing data to database @ {database.server_host}.')
+                    try:
+                        database.reconnect()
+                        print(f'Reconnected to {database.server_host}')
+                    except:
+                        print(f'Could not reconnect to {database.server_host}')
 
         time.sleep(.1)
+
+##
 
