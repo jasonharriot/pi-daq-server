@@ -2,8 +2,8 @@ import mysql.connector
 import adam6200
 import datetime
 import time
-import utils
 import configparser
+import timer
 
 def map_raw_value(value, calib_item):
     real_slope_per_raw = (calib_item['max_real']-calib_item['min_real'])/(calib_item['max_raw'] - calib_item['min_raw'])
@@ -139,7 +139,7 @@ if __name__ == '__main__':
         },
         5:{
             'name':'S1',
-            'min_raw':0,
+            'min_raw':0.04515,
             'max_raw':20,
             'min_real':0,
             'max_real':87
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     }
 
 
-    data_timer = utils.Timer(datetime.timedelta(seconds=10))    #Capture new data at this interval
+    data_timer = timer.Timer(datetime.timedelta(seconds=10))    #Capture new data at this interval
 
     for database in databases:
         capture_ranges(adam1, database, calib)
